@@ -5,7 +5,10 @@ import Button from '@material-ui/core/Button';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import Typography from '@material-ui/core/Typography';
 import Challenge from './Challenge';
-import {products} from 'Logic/redux/state/products_load';
+import {products, TProducts} from 'Logic/redux/state/products_load';
+import FetchingHistory from './FetchingHistory';
+import ItemList from './ItemList';
+import {TFunction} from 'Lib/Core/prop_types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,21 +29,10 @@ const useStyles = makeStyles((theme) => ({
     alignSelf: 'center',
     marginTop: 50,
   },
-  side: {
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 10,
-    boxShadow: theme.design.boxShadow,
-  },
-  detail: {
-    marginBottom: 8,
-  },
-  subTitle: {
-    marginBottom: 10,
-  },
   result: {
     textAlign: 'center',
     marginTop: 50,
+    marginBottom: 20,
   }
 }));
 
@@ -56,7 +48,7 @@ function HomePage({
   const [urls, setUrls] = useState([FIRST_URL]);
   const [objects, setObjects] = useState([]);
   const [hasRun, setHasRun] = useState(false);
-  const [total, setTotal] = useState(0);
+  const [average, setAverage] = useState(0);
 
   const addAirConditioners = useCallback(
     (items) => {
@@ -101,18 +93,18 @@ function HomePage({
         for (let i = 0; i < objects.length; ++ i) {
           sum += computeSingleWeight(objects[i]);
         }
-        setTotal(sum);
+        setAverage(objects.length > 0 ? sum / objects.length : 0);
       }
     },
     [
       products.next,
-      setTotal,
+      setAverage,
       objects,
     ]
   );
 
   function computeSingleWeight(items) {
-    return items.size.width / 100 * items.size.height / 100 * items.size.length / 100 * WEIGHT_FACTOR * 1000
+    return items.size.width * items.size.height * items.size.length * WEIGHT_FACTOR / 1000;
   }
 
   function resetAll() {
@@ -124,39 +116,6 @@ function HomePage({
     resetAll();
     loadProducts({pageUrl: FIRST_URL});
     setHasRun(true);
-  }
-
-  function renderFetchingHistory(histories) {
-    if (histories.length === 0 || !hasRun) { // can never be 0 here
-      return (<div/>);
-    }
-    return (
-      <div className={classes.side}>
-        <Typography variant={'h6'} className={classes.subTitle}>Fetching History</Typography>
-        {histories.map((item, index) => {
-          return (<Typography key={`f_${index}`} className={classes.detail}>{index + 1}. Fetching from {item}</Typography>)
-        })}
-      </div>
-    );
-  }
-
-  function renderObjectItems(items) {
-    if (items.length === 0) {
-      return (<div/>);
-    }
-    return (
-      <div className={classes.side}>
-        <Typography variant={'h6'} className={classes.subTitle}>Air Conditioners</Typography>
-        {(items.length > 0) &&
-        items.map((item, index) => {
-          return (
-            <div key={`o_${index}`} className={classes.detail}>
-              <Typography>{index + 1}. {item.title}</Typography>
-              <Typography>{JSON.stringify(item.size)}</Typography>
-            </div>
-          )})}
-      </div>
-    );
   }
 
   return (
@@ -172,15 +131,17 @@ function HomePage({
         Run
       </Button>
       <div className={classes.body}>
-        {renderFetchingHistory(urls)}
-        {renderObjectItems(objects)}
+        <FetchingHistory isDisplay={hasRun} urls={urls}/>
+        <ItemList items={objects}/>
       </div>
-      {total > 0 && (<Typography className={classes.result} variant={'h5'}>{total}</Typography>)}
+      {average > 0 && (<Typography className={classes.result} variant={'h5'}>Average Weight: {average.toFixed(0)}g</Typography>)}
     </div>
   );
 }
 
 HomePage.propTypes = {
+  loadProducts: TFunction.isRequired,
+  products: TProducts.isRequired,
 };
 
 function mapStateToProps(state) {

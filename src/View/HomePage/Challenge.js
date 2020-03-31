@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 8,
-  },\
+  },
   left: {
     minWidth: 150,
     flexGrow: 1,
