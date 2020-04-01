@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 import {makeStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import Typography from '@material-ui/core/Typography';
 import Challenge from './Challenge';
 import {products, TProducts} from 'Logic/redux/state/products_load';
@@ -28,10 +29,11 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 120,
     alignSelf: 'center',
     marginTop: 50,
+    marginBottom: 10,
   },
   result: {
     textAlign: 'center',
-    marginTop: 50,
+    marginTop: 90,
     marginBottom: 20,
   }
 }));
@@ -110,10 +112,12 @@ function HomePage({
   function resetAll() {
     setUrls([FIRST_URL]);
     setObjects([]);
+    setAverage(0);
+    setHasRun(false);
   }
 
   function solve() {
-    resetAll();
+    // resetAll();
     loadProducts({pageUrl: FIRST_URL});
     setHasRun(true);
   }
@@ -127,6 +131,7 @@ function HomePage({
         className={classes.button}
         startIcon={<PlayArrowIcon />}
         onClick={solve}
+        disabled={hasRun}
       >
         Run
       </Button>
@@ -135,6 +140,17 @@ function HomePage({
         <ItemList items={objects}/>
       </div>
       {average > 0 && (<Typography className={classes.result} variant={'h5'}>Average Weight: {average.toFixed(0)}g</Typography>)}
+      {average > 0 && (
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.button}
+          startIcon={<RotateLeftIcon />}
+          onClick={resetAll}
+        >
+          Reset
+        </Button>
+      )}
     </div>
   );
 }
